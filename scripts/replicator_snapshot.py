@@ -53,8 +53,6 @@ def main():
     parent_mesh = modo.Scene().addMesh(PARENT_MESH_NAME)
     parent_items_to(selected, parent_mesh)
     replicator = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
-    # replicator.select(replace=True)
-    # lx.eval('item.channel replicator$hierarchy true')
     replicator.channel('hierarchy').set(True)
 
     workspace = get_workspace(WORKSPACE_NAME)
