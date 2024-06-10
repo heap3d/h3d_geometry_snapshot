@@ -2,7 +2,8 @@
 <package version="801">
 	<kit name="h3d_geometry_snapshot" restart="YES">
 		<source target="h3d_geometry_snapshot/index.CFG">index.CFG</source>
-		<source target="h3d_geometry_snapshot/scripts/merge_selected_meshes_snapshot.py">scripts/merge_selected_meshes_snapshot.py</source>
+		<source target="h3d_geometry_snapshot/scripts/merge_meshes_snapshot.py">scripts/merge_meshes_snapshot.py</source>
+		<source target="h3d_geometry_snapshot/scripts/replicator_snapshot.py">scripts/replicator_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_schematic_nodes.py">scripts/select_schematic_nodes.py</source>
 	</kit>
 	<message button="Help">h3d_geometry_snapshot Kit installation complete.</message>

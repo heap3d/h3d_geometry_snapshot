@@ -10,12 +10,12 @@
 
 
 import modo
-from .merge_selected_meshes_snapshot import select_schematic_nodes, Node
+from scripts.merge_meshes_snapshot import select_schematic_nodes
 
 
 def main():
     selected_items = modo.Scene().selected
-    select_schematic_nodes(selected_items, Node.SET)
+    select_schematic_nodes(selected_items)
 
 
 if __name__ == '__main__':
