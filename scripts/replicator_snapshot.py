@@ -20,6 +20,7 @@ from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
 )
 
 from h3d_utilites.scripts.h3d_utils import parent_items_to
+from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 
 REPLICATOR_NAME = 'replicator snapshot'
@@ -32,6 +33,7 @@ def create_vertex_at_zero(name: str) -> modo.Item:
     vertex_zero_mesh.select(replace=True)
     lx.eval('tool.set prim.makeVertex on 0')
     lx.eval('tool.apply')
+    lx.eval('tool.set prim.makeVertex off 0')
     return vertex_zero_mesh
 
 
@@ -61,6 +63,9 @@ def main():
     lx.eval(f'item.link particle.source {vertex_zero.id} {replicator.id} replace:false')
     lx.eval(f'item.link particle.proto {parent_mesh.id} {replicator.id} replace:false')
 
+    replicator.select(replace=True)
+
 
 if __name__ == '__main__':
+    h3dd = H3dDebug(enable=False, file='replicator snapshot.log')
     main()

@@ -110,6 +110,8 @@ def main():
     lx.eval('item.channel pmodel.meshmerge$copyNormal true')
     link_to_merge_meshes(selected_geometry, merge_meshes_meshop)
 
+    geometry_snapshot.select(replace=True)
+
 
 if __name__ == '__main__':
     main()
