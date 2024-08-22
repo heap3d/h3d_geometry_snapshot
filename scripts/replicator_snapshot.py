@@ -32,6 +32,9 @@ def create_vertex_at_zero(name: str) -> modo.Item:
     vertex_zero_mesh = modo.Scene().addMesh(name)
     vertex_zero_mesh.select(replace=True)
     lx.eval('tool.set prim.makeVertex on 0')
+    lx.eval('tool.attr prim.makeVertex cenX 0.0')
+    lx.eval('tool.attr prim.makeVertex cenY 0.0')
+    lx.eval('tool.attr prim.makeVertex cenZ 0.0')
     lx.eval('tool.apply')
     lx.eval('tool.set prim.makeVertex off 0')
     return vertex_zero_mesh
