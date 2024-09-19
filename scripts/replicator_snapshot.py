@@ -14,8 +14,8 @@ import lx
 
 from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     WORKSPACE_NAME,
-    get_workspace,
-    view_workspace,
+    get_workspace_assembly,
+    view_workspace_assembly,
     add_to_schematic,
 )
 
@@ -23,9 +23,39 @@ from h3d_utilites.scripts.h3d_utils import parent_items_to
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 
-REPLICATOR_NAME = 'replicator snapshot'
+REPLICATOR_NAME = 'SNAPSHOT'
 PARENT_MESH_NAME = 'parent mesh'
 VERTEX_ZERO_NAME = 'vertex_ZERO'
+
+
+def main():
+    selected = modo.Scene().selected
+    replicator = replicate(selected)  # type: ignore
+    replicator.select(replace=True)
+
+
+def replicate(items: tuple[modo.Item]) -> modo.Item:
+    vertex_zero = get_vertex_zero(VERTEX_ZERO_NAME)
+    parent_mesh = modo.Scene().addMesh(PARENT_MESH_NAME)
+    parent_items_to(items, parent_mesh)
+    replicator: modo.Item = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
+    if channel := replicator.channel('hierarchy'):
+        channel.set(True)
+
+    workspace = get_workspace_assembly(WORKSPACE_NAME)
+    view_workspace_assembly(workspace)
+    add_to_schematic((vertex_zero, parent_mesh, replicator), workspace)  # type: ignore
+    lx.eval(f'item.link particle.source {vertex_zero.id} {replicator.id} replace:false')
+    lx.eval(f'item.link particle.proto {parent_mesh.id} {replicator.id} replace:false')
+
+    return replicator
+
+
+def get_vertex_zero(name: str) -> modo.Item:
+    try:
+        return modo.Scene().item(name)
+    except LookupError:
+        return create_vertex_at_zero(name)
 
 
 def create_vertex_at_zero(name: str) -> modo.Item:
@@ -42,31 +72,6 @@ def create_vertex_at_zero(name: str) -> modo.Item:
 
 def replicator_link_prototype(item: modo.Item, replicator: modo.Item) -> None:
     lx.eval(f'item.link particle.proto {item.id} {replicator.id} replace:false')
-
-
-def get_vertex_zero(name: str) -> modo.Item:
-    try:
-        return modo.Scene().item(name)
-    except LookupError:
-        return create_vertex_at_zero(name)
-
-
-def main():
-    selected = modo.Scene().selected
-
-    vertex_zero = get_vertex_zero(VERTEX_ZERO_NAME)
-    parent_mesh = modo.Scene().addMesh(PARENT_MESH_NAME)
-    parent_items_to(selected, parent_mesh)
-    replicator = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
-    replicator.channel('hierarchy').set(True)
-
-    workspace = get_workspace(WORKSPACE_NAME)
-    view_workspace(workspace)
-    add_to_schematic((vertex_zero, parent_mesh, replicator), workspace)
-    lx.eval(f'item.link particle.source {vertex_zero.id} {replicator.id} replace:false')
-    lx.eval(f'item.link particle.proto {parent_mesh.id} {replicator.id} replace:false')
-
-    replicator.select(replace=True)
 
 
 if __name__ == '__main__':

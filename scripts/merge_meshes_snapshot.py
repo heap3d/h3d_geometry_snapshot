@@ -11,10 +11,128 @@
 
 import modo
 import lx
+import modo.constants as c
+
+from h3d_utilites.scripts.h3d_utils import itype_str
+from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 
 WORKSPACE_NAME = '_Geometry Snapshot'
-GEOMETRY_SNAPSHOT_NAME = 'geometry snapshot'
+MERGED_NONREPLICATORS_NAME = 'merged non-replicators'
+MERGED_REPLICATORS_NAME = 'merged replicators'
+
+
+def main():
+    # filter geometry items
+    lx.eval('selectPattern.lookAtSelect true')
+    lx.eval('selectPattern.none')
+    lx.eval('selectPattern.toggleMesh true')
+    lx.eval('selectPattern.toggleInstance true')
+    lx.eval('selectPattern.toggleReplic true')
+    lx.eval('selectPattern.apply set')
+    selected_geometry: tuple[modo.Item] = modo.Scene().selected  # type:ignore
+    nonreplicators: tuple[modo.Item] = tuple(
+        i for i in selected_geometry
+        if i.type != itype_str(c.REPLICATOR_TYPE)
+        )  # type:ignore
+    replicators: tuple[modo.Item] = tuple(
+        i for i in selected_geometry
+        if i.type == itype_str(c.REPLICATOR_TYPE)
+        )  # type:ignore
+
+    if not selected_geometry:
+        return
+    workspace = get_workspace_assembly(WORKSPACE_NAME)
+    view_workspace_assembly(workspace)
+    if nonreplicators:
+        add_to_schematic(nonreplicators, workspace)
+        merged_nonreplicators = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
+        add_to_schematic((merged_nonreplicators,), workspace)
+        merged_nonreplicators.select(replace=True)
+
+        preset_browser_opened = open_preset_browser()
+        lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
+        lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
+        lx.eval('preset.do')
+        restore_preset_browser(preset_browser_opened)
+
+        merge_meshes_meshop_nonreplicators = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+        lx.eval('item.channel pmodel.meshmerge$copyNormal true')
+        link_to_merge_meshes(nonreplicators, merge_meshes_meshop_nonreplicators)
+
+    if replicators:
+        add_to_schematic(replicators, workspace)
+        merged_replicators = modo.Scene().addMesh(MERGED_REPLICATORS_NAME)
+        add_to_schematic((merged_replicators,), workspace)
+        merged_replicators.select(replace=True)
+
+        preset_browser_opened = open_preset_browser()
+        lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
+        lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
+        lx.eval('preset.do')
+        restore_preset_browser(preset_browser_opened)
+
+        merge_meshes_meshop_replicators = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+        lx.eval('item.channel pmodel.meshmerge$copyNormal true')
+        lx.eval('item.channel pmodel.meshmerge$world false')
+        link_to_merge_meshes(replicators, merge_meshes_meshop_replicators)
+
+    modo.Scene().deselect()
+    if nonreplicators:
+        merged_nonreplicators.select()
+    if replicators:
+        merged_replicators.select()
+
+
+def get_workspace_assembly(name: str) -> modo.Item:
+    if not name:
+        raise ValueError('name is empty')
+    # try to find workspace by name
+    assemblies = modo.Scene().getGroups('assembly')
+    for workspace in assemblies:
+        if workspace.name == name:
+            return workspace
+
+    # create new if not found
+    lx.eval(f'schematic.createWorkspace "{name}" true')
+    return get_workspace_assembly(name)
+
+
+def view_workspace_assembly(workspace: modo.Item):
+    lx.eval(f'schematic.viewAssembly group:{workspace.id}')
+
+
+def add_to_schematic(items: tuple[modo.Item], workspace: modo.Item):
+    for item in items:
+        item.select(replace=True)
+        lx.eval('select.drop schmNode')
+        lx.eval('select.drop link')
+        lx.eval(f'schematic.addItem {{{item.id}}} {workspace.id} true')
+        lx.eval(f'schematic.addChannel group:{workspace.id}')
+
+
+def open_preset_browser() -> bool:
+    preset_browser_opened = lx.eval('layout.createOrClose PresetBrowser presetBrowserPalette ?')
+    if not preset_browser_opened:
+        lx.eval(
+            'layout.createOrClose PresetBrowser presetBrowserPalette true Presets '
+            'width:800 height:600 persistent:true style:palette'
+        )
+
+    return bool(preset_browser_opened)
+
+
+def restore_preset_browser(opened: bool):
+    if not opened:
+        lx.eval(
+            'layout.createOrClose PresetBrowser presetBrowserPalette false Presets width:800 height:600 '
+            'persistent:true style:palette'
+        )
+
+
+def link_to_merge_meshes(items: tuple[modo.Item], merge_mesh_meshop: modo.Item):
+    for item in items:
+        lx.eval(f'item.link pmodel.meshmerge.graph {{{item.id}}} {merge_mesh_meshop.id} replace:false')
 
 
 class NodeSelection():
@@ -32,86 +150,6 @@ def select_schematic_nodes(items: list[modo.Item], mode: str = NodeSelection.ADD
         lx.eval(evalstr)
 
 
-def get_workspace(name: str) -> modo.Item:
-    if not name:
-        raise ValueError('name is empty')
-    # try to find workspace by name
-    assemblies = modo.Scene().getGroups('assembly')
-    for workspace in assemblies:
-        if workspace.name == name:
-            return workspace
-
-    # create new if not found
-    lx.eval(f'schematic.createWorkspace "{name}" true')
-    return get_workspace(name)
-
-
-def view_workspace(workspace: modo.Item):
-    lx.eval(f'schematic.viewAssembly group:{workspace.id}')
-
-
-def add_to_schematic(items: list[modo.Item], workspace: modo.Item) -> None:
-    for item in items:
-        item.select(replace=True)
-        lx.eval('select.drop schmNode')
-        lx.eval('select.drop link')
-        lx.eval(f'schematic.addItem {{{item.id}}} {workspace.id} true')
-        lx.eval(f'schematic.addChannel group:{workspace.id}')
-
-
-def link_to_merge_meshes(items: list[modo.Item], merge_mesh_meshop: modo.Item):
-    for item in items:
-        lx.eval(f'item.link pmodel.meshmerge.graph {{{item.id}}} {merge_mesh_meshop.id} replace:false')
-
-
-def open_preset_browser() -> bool:
-    preset_browser_opened = lx.eval('layout.createOrClose PresetBrowser presetBrowserPalette ?')
-    if not preset_browser_opened:
-        lx.eval(
-            'layout.createOrClose PresetBrowser presetBrowserPalette true Presets '
-            'width:800 height:600 persistent:true style:palette'
-        )
-
-    return preset_browser_opened
-
-
-def restore_preset_browser(opened: bool) -> None:
-    if not opened:
-        lx.eval(
-            'layout.createOrClose PresetBrowser presetBrowserPalette false Presets width:800 height:600 '
-            'persistent:true style:palette'
-        )
-
-
-def main():
-    # filter geometry items
-    lx.eval('selectPattern.lookAtSelect true')
-    lx.eval('selectPattern.none')
-    lx.eval('selectPattern.toggleMesh true')
-    lx.eval('selectPattern.toggleInstance true')
-    lx.eval('selectPattern.toggleReplic true')
-    lx.eval('selectPattern.apply set')
-    selected_geometry = modo.Scene().selected
-
-    workspace = get_workspace(WORKSPACE_NAME)
-    view_workspace(workspace)
-    add_to_schematic(selected_geometry, workspace)
-    geometry_snapshot = modo.Scene().addMesh(GEOMETRY_SNAPSHOT_NAME)
-    add_to_schematic((geometry_snapshot,), workspace)
-    geometry_snapshot.select(replace=True)
-
-    preset_browser_opened = open_preset_browser()
-    lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
-    lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
-    lx.eval('preset.do')
-    restore_preset_browser(preset_browser_opened)
-
-    merge_meshes_meshop = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
-    lx.eval('item.channel pmodel.meshmerge$copyNormal true')
-    link_to_merge_meshes(selected_geometry, merge_meshes_meshop)
-
-    geometry_snapshot.select(replace=True)
-
-
 if __name__ == '__main__':
+    h3dd = H3dDebug(enable=False, file=modo.Scene().filename+'.log')
     main()
