@@ -5,7 +5,7 @@
 # --------------------------------
 # modo python
 # EMAG
-# make merge selected meshes snapshot
+# make merge meshes snapshot setup for each selected mesh
 # ================================
 
 
@@ -42,12 +42,12 @@ def main():
 
     if not selected_geometry:
         return
-    workspace = get_workspace_assembly(WORKSPACE_NAME)
-    view_workspace_assembly(workspace)
+    workspace_assembly = get_workspace_assembly(WORKSPACE_NAME)
+    view_workspace_assembly(workspace_assembly)
     if nonreplicators:
-        add_to_schematic(nonreplicators, workspace)
+        add_to_schematic(nonreplicators, workspace_assembly)
         merged_nonreplicators = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
-        add_to_schematic((merged_nonreplicators,), workspace)
+        add_to_schematic((merged_nonreplicators,), workspace_assembly)
         merged_nonreplicators.select(replace=True)
 
         preset_browser_opened = open_preset_browser()
@@ -61,9 +61,9 @@ def main():
         link_to_merge_meshes(nonreplicators, merge_meshes_meshop_nonreplicators)
 
     if replicators:
-        add_to_schematic(replicators, workspace)
+        add_to_schematic(replicators, workspace_assembly)
         merged_replicators = modo.Scene().addMesh(MERGED_REPLICATORS_NAME)
-        add_to_schematic((merged_replicators,), workspace)
+        add_to_schematic((merged_replicators,), workspace_assembly)
         merged_replicators.select(replace=True)
 
         preset_browser_opened = open_preset_browser()

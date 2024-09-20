@@ -37,7 +37,7 @@ def main():
 def replicate(items: tuple[modo.Item]) -> modo.Item:
     vertex_zero = get_vertex_zero(VERTEX_ZERO_NAME)
     parent_mesh = modo.Scene().addMesh(PARENT_MESH_NAME)
-    parent_items_to(items, parent_mesh)
+    parent_items_to(items, parent_mesh)  # type: ignore
     replicator: modo.Item = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
     if channel := replicator.channel('hierarchy'):
         channel.set(True)
