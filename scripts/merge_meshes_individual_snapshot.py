@@ -24,6 +24,7 @@ from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     open_preset_browser,
     restore_preset_browser,
     link_to_merge_meshes,
+    filter_working,
 )
 
 
@@ -31,14 +32,8 @@ MERGED_NAME_SUFFIX = 'merged'
 
 
 def main():
-    # filter geometry items
-    lx.eval('selectPattern.lookAtSelect true')
-    lx.eval('selectPattern.none')
-    lx.eval('selectPattern.toggleMesh true')
-    lx.eval('selectPattern.toggleInstance true')
-    lx.eval('selectPattern.toggleReplic true')
-    lx.eval('selectPattern.apply set')
-    selected_geometry: tuple[modo.Item] = modo.Scene().selected  # type:ignore
+    selected: tuple[modo.Item] = modo.Scene().selected  # type: ignore
+    selected_geometry = filter_working(selected)
     nonreplicators: tuple[modo.Item] = tuple(
         i for i in selected_geometry
         if i.type != itype_str(c.REPLICATOR_TYPE)

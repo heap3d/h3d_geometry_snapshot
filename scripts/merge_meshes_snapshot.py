@@ -9,6 +9,8 @@
 # ================================
 
 
+from typing import Iterable
+
 import modo
 import lx
 import modo.constants as c
@@ -23,14 +25,8 @@ MERGED_REPLICATORS_NAME = 'merged replicators'
 
 
 def main():
-    # filter geometry items
-    lx.eval('selectPattern.lookAtSelect true')
-    lx.eval('selectPattern.none')
-    lx.eval('selectPattern.toggleMesh true')
-    lx.eval('selectPattern.toggleInstance true')
-    lx.eval('selectPattern.toggleReplic true')
-    lx.eval('selectPattern.apply set')
-    selected_geometry: tuple[modo.Item] = modo.Scene().selected  # type:ignore
+    selected: tuple[modo.Item] = modo.Scene().selected  # type: ignore
+    selected_geometry = filter_working(selected)
     nonreplicators: tuple[modo.Item] = tuple(
         i for i in selected_geometry
         if i.type != itype_str(c.REPLICATOR_TYPE)
@@ -82,6 +78,15 @@ def main():
         merged_nonreplicators.select()
     if replicators:
         merged_replicators.select()
+
+
+def filter_working(items: Iterable[modo.Item]) -> tuple[modo.Item, ...]:
+    WORKING_TYPES = (
+        'mesh',
+        'meshInst',
+        'replicator',
+    )
+    return tuple(i for i in items if i.type in WORKING_TYPES)
 
 
 def get_workspace_assembly(name: str) -> modo.Item:
