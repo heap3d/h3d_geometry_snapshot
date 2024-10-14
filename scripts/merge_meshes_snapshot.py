@@ -15,7 +15,7 @@ import modo
 import lx
 import modo.constants as c
 
-from h3d_utilites.scripts.h3d_utils import itype_str
+from h3d_utilites.scripts.h3d_utils import itype_str, parent_items_to
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 
@@ -43,6 +43,7 @@ def main():
     if nonreplicators:
         add_to_schematic(nonreplicators, workspace_assembly)
         merged_nonreplicators = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
+        parent_items_to([merged_nonreplicators, ], parent=None, index=0)  # type: ignore
         add_to_schematic((merged_nonreplicators,), workspace_assembly)
         merged_nonreplicators.select(replace=True)
 
@@ -59,6 +60,7 @@ def main():
     if replicators:
         add_to_schematic(replicators, workspace_assembly)
         merged_replicators = modo.Scene().addMesh(MERGED_REPLICATORS_NAME)
+        parent_items_to([merged_replicators, ], parent=None, index=0)  # type: ignore
         add_to_schematic((merged_replicators,), workspace_assembly)
         merged_replicators.select(replace=True)
 
