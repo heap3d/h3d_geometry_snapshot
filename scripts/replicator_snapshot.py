@@ -36,7 +36,7 @@ def main():
 
 def replicate(items: tuple[modo.Item]) -> modo.Item:
     vertex_zero = get_vertex_zero(VERTEX_ZERO_NAME)
-    parent_mesh = modo.Scene().addMesh(PARENT_MESH_NAME)
+    parent_mesh = new_mesh_vertex_at_zero(PARENT_MESH_NAME)
     parent_items_to(items, parent_mesh)  # type: ignore
     replicator: modo.Item = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
     if channel := replicator.channel('hierarchy'):
@@ -55,10 +55,10 @@ def get_vertex_zero(name: str) -> modo.Item:
     try:
         return modo.Scene().item(name)
     except LookupError:
-        return create_vertex_at_zero(name)
+        return new_mesh_vertex_at_zero(name)
 
 
-def create_vertex_at_zero(name: str) -> modo.Item:
+def new_mesh_vertex_at_zero(name: str) -> modo.Item:
     vertex_zero_mesh = modo.Scene().addMesh(name)
     vertex_zero_mesh.select(replace=True)
     lx.eval('tool.set prim.makeVertex on 0')
