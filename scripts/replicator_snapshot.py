@@ -45,8 +45,8 @@ def replicate(items: tuple[modo.Item]) -> modo.Item:
     workspace = get_workspace_assembly(WORKSPACE_NAME)
     view_workspace_assembly(workspace)
     add_to_schematic((vertex_zero, parent_mesh, replicator), workspace)  # type: ignore
-    lx.eval(f'item.link particle.source {vertex_zero.id} {replicator.id} replace:false')
-    lx.eval(f'item.link particle.proto {parent_mesh.id} {replicator.id} replace:false')
+    lx.eval(f'item.link particle.source {{{vertex_zero.id}}} {{{replicator.id}}} replace:false')
+    lx.eval(f'item.link particle.proto {{{parent_mesh.id}}} {{{replicator.id}}} replace:false')
 
     return replicator
 
@@ -71,7 +71,7 @@ def new_mesh_vertex_at_zero(name: str) -> modo.Item:
 
 
 def replicator_link_prototype(item: modo.Item, replicator: modo.Item) -> None:
-    lx.eval(f'item.link particle.proto {item.id} {replicator.id} replace:false')
+    lx.eval(f'item.link particle.proto {{{item.id}}} {{{replicator.id}}} replace:false')
 
 
 if __name__ == '__main__':

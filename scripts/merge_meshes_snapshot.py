@@ -106,7 +106,7 @@ def get_workspace_assembly(name: str) -> modo.Item:
 
 
 def view_workspace_assembly(workspace: modo.Item):
-    lx.eval(f'schematic.viewAssembly group:{workspace.id}')
+    lx.eval(f'schematic.viewAssembly group:{{{workspace.id}}}')
 
 
 def add_to_schematic(items: tuple[modo.Item], workspace: modo.Item):
@@ -114,8 +114,8 @@ def add_to_schematic(items: tuple[modo.Item], workspace: modo.Item):
         item.select(replace=True)
         lx.eval('select.drop schmNode')
         lx.eval('select.drop link')
-        lx.eval(f'schematic.addItem {{{item.id}}} {workspace.id} true')
-        lx.eval(f'schematic.addChannel group:{workspace.id}')
+        lx.eval(f'schematic.addItem {{{item.id}}} {{{workspace.id}}} true')
+        lx.eval(f'schematic.addChannel group:{{{workspace.id}}}')
 
 
 def open_preset_browser() -> bool:
@@ -139,7 +139,7 @@ def restore_preset_browser(opened: bool):
 
 def link_to_merge_meshes(items: tuple[modo.Item], merge_mesh_meshop: modo.Item):
     for item in items:
-        lx.eval(f'item.link pmodel.meshmerge.graph {{{item.id}}} {merge_mesh_meshop.id} replace:false')
+        lx.eval(f'item.link pmodel.meshmerge.graph {{{item.id}}} {{{merge_mesh_meshop.id}}} replace:false')
 
 
 class NodeSelection():
@@ -152,7 +152,7 @@ class NodeSelection():
 def select_schematic_nodes(items: list[modo.Item], mode: str = NodeSelection.ADD) -> None:
     for item in items:
         schematic_node = item.itemGraph('schmItem').forward()[-1]  # type: ignore
-        evalstr = f'select.node {schematic_node.id} {mode} {schematic_node.id}'
+        evalstr = f'select.node {{{schematic_node.id}}} {mode} {{{schematic_node.id}}}'
         print(evalstr)
         lx.eval(evalstr)
 
