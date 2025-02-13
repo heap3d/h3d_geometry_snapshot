@@ -11,6 +11,8 @@
 import modo
 from typing import Iterable
 
+from h3d_utilites.scripts.h3d_utils import is_visible
+
 
 def main():
     items = modo.Scene().selected
@@ -25,8 +27,7 @@ def main():
 def get_meshes_from(items: Iterable[modo.Item]) -> list[modo.Item]:
     meshes = [i for i in items if i.type == 'mesh']
     meshes = [i for i in meshes if ':' not in i.id]
-    meshes = [i for i in meshes if i.channel('visible').get() == 'default']  # type: ignore
-    meshes = [i for i in meshes if all([p.channel('visible').get() == 'default' for p in i.parents])]  # type: ignore
+    meshes = [i for i in meshes if is_visible(i)]
     meshes = [i for i in meshes if i.geometry.polygons]
     return meshes
 
