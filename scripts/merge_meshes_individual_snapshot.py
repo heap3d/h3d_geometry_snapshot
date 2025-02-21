@@ -14,7 +14,6 @@ import lx
 import modo.constants as c
 
 from h3d_utilites.scripts.h3d_utils import itype_str, parent_items_to
-from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     WORKSPACE_NAME,
@@ -105,6 +104,50 @@ def rename(name: str) -> str:
     return f'{name} {MERGED_NAME_SUFFIX}'
 
 
+def new_nonreplicator_snapshot():
+    add_to_schematic((nonreplicator,), workspace)
+    merged_nonreplicator = modo.Scene().addMesh(rename(nonreplicator.name))
+    add_to_schematic((merged_nonreplicator,), workspace)
+    merged_nonreplicator.select(replace=True)
+
+    lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
+    lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
+    lx.eval('preset.do')
+
+    merge_meshes_meshop_nonreplicator = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+    lx.eval('item.channel pmodel.meshmerge$copyNormal true')
+    link_to_merge_meshes((nonreplicator,), merge_meshes_meshop_nonreplicator)
+    new_items.append(merged_nonreplicator)
+
+    copies[nonreplicator] = merged_nonreplicator
+
+
+def new_replicator_snapshot():
+    add_to_schematic(replicators, workspace)
+    merged_replicator = modo.Scene().addMesh(rename(replicator.name))
+    add_to_schematic((merged_replicator,), workspace)
+    merged_replicator.select(replace=True)
+
+    lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
+    lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
+    lx.eval('preset.do')
+
+    merge_meshes_meshop_replicator = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+    lx.eval('item.channel pmodel.meshmerge$copyNormal true')
+    lx.eval('item.channel pmodel.meshmerge$world false')
+    link_to_merge_meshes((replicator,), merge_meshes_meshop_replicator)
+    new_items.append(merged_replicator)
+
+    copies[replicator] = merged_replicator
+
+
+def filter_nonreplicators():
+    ...
+
+
+def filter_replicators():
+    ...
+
+
 if __name__ == '__main__':
-    h3dd = H3dDebug(enable=False, file=modo.Scene().filename+'.log')
     main()
