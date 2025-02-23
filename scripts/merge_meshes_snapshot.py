@@ -94,13 +94,12 @@ def filter_working(items: Iterable[modo.Item]) -> tuple[modo.Item, ...]:
 def get_workspace_assembly(name: str) -> modo.Item:
     if not name:
         raise ValueError('name is empty')
-    # try to find workspace by name
+
     assemblies = modo.Scene().getGroups('assembly')
     for workspace in assemblies:
         if workspace.name == name:
             return workspace
 
-    # create new if not found
     lx.eval(f'schematic.createWorkspace "{name}" true')
     return get_workspace_assembly(name)
 
@@ -109,7 +108,7 @@ def view_workspace_assembly(workspace: modo.Item):
     lx.eval(f'schematic.viewAssembly group:{{{workspace.id}}}')
 
 
-def add_to_schematic(items: tuple[modo.Item], workspace: modo.Item):
+def add_to_schematic(items: Iterable[modo.Item], workspace: modo.Item):
     for item in items:
         item.select(replace=True)
         lx.eval('select.drop schmNode')
