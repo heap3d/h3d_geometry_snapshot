@@ -13,9 +13,8 @@ from typing import Iterable
 
 import modo
 import lx
-import modo.constants as c
 
-from h3d_utilites.scripts.h3d_utils import itype_str, parent_items_to
+from h3d_utilites.scripts.h3d_utils import parent_items_to
 
 from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     WORKSPACE_NAME,
@@ -26,6 +25,8 @@ from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     restore_preset_browser,
     link_to_merge_meshes,
     filter_working,
+    filter_nonreplicators,
+    filter_replicators,
 )
 
 
@@ -45,10 +46,10 @@ def main():
     view_workspace_assembly(workspace)
     preset_browser_opened = open_preset_browser()
 
-    new_nonreplicators = new_nonreplicators_in_schematic(nonreplicators, workspace)
+    new_nonreplicators = new_individual_nonreplicators(nonreplicators, workspace)
     copies = dict(zip(nonreplicators, new_nonreplicators))
 
-    new_replicators = new_replicators_in_schematic(replicators, workspace)
+    new_replicators = new_individual_replicators(replicators, workspace)
     copies.update(zip(replicators, new_replicators))
 
     restore_preset_browser(preset_browser_opened)
@@ -65,7 +66,7 @@ def snapshot_name(name: str) -> str:
     return f'{name} {MERGED_NAME_SUFFIX}'
 
 
-def new_nonreplicators_in_schematic(items: Iterable[modo.Item], workspace: modo.Item) -> list[modo.Item]:
+def new_individual_nonreplicators(items: Iterable[modo.Item], workspace: modo.Item) -> list[modo.Item]:
     add_to_schematic(items, workspace)
     new_items: list[modo.Item] = []
     for item in items:
@@ -85,7 +86,7 @@ def new_nonreplicators_in_schematic(items: Iterable[modo.Item], workspace: modo.
     return new_items
 
 
-def new_replicators_in_schematic(items: Iterable[modo.Item], workspace: modo.Item) -> list[modo.Item]:
+def new_individual_replicators(items: Iterable[modo.Item], workspace: modo.Item) -> list[modo.Item]:
     add_to_schematic(items, workspace)
     new_items: list[modo.Item] = []
     for item in items:
@@ -104,14 +105,6 @@ def new_replicators_in_schematic(items: Iterable[modo.Item], workspace: modo.Ite
         new_items.append(merged_replicator)
 
     return new_items
-
-
-def filter_nonreplicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
-    return tuple(i for i in items if i.type != itype_str(c.REPLICATOR_TYPE))  # type:ignore
-
-
-def filter_replicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
-    return tuple(i for i in items if i.type == itype_str(c.REPLICATOR_TYPE))  # type:ignore
 
 
 if __name__ == '__main__':

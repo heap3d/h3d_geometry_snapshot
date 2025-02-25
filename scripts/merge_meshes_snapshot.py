@@ -16,7 +16,6 @@ import lx
 import modo.constants as c
 
 from h3d_utilites.scripts.h3d_utils import itype_str, parent_items_to
-from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 
 WORKSPACE_NAME = '_Geometry Snapshot'
@@ -27,59 +26,26 @@ MERGED_REPLICATORS_NAME = 'merged replicators'
 def main():
     selected: tuple[modo.Item] = modo.Scene().selected  # type: ignore
     selected_geometry = filter_working(selected)
-    nonreplicators: tuple[modo.Item] = tuple(
-        i for i in selected_geometry
-        if i.type != itype_str(c.REPLICATOR_TYPE)
-        )  # type:ignore
-    replicators: tuple[modo.Item] = tuple(
-        i for i in selected_geometry
-        if i.type == itype_str(c.REPLICATOR_TYPE)
-        )  # type:ignore
+    nonreplicators = filter_nonreplicators(selected_geometry)
+    replicators = filter_replicators(selected_geometry)
 
     if not selected_geometry:
         return
+
     workspace_assembly = get_workspace_assembly(WORKSPACE_NAME)
     view_workspace_assembly(workspace_assembly)
+
     if nonreplicators:
-        add_to_schematic(nonreplicators, workspace_assembly)
-        merged_nonreplicators = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
-        parent_items_to([merged_nonreplicators, ], parent=None, index=0)  # type: ignore
-        add_to_schematic((merged_nonreplicators,), workspace_assembly)
-        merged_nonreplicators.select(replace=True)
-
-        preset_browser_opened = open_preset_browser()
-        lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
-        lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
-        lx.eval('preset.do')
-        restore_preset_browser(preset_browser_opened)
-
-        merge_meshes_meshop_nonreplicators = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
-        lx.eval('item.channel pmodel.meshmerge$copyNormal true')
-        link_to_merge_meshes(nonreplicators, merge_meshes_meshop_nonreplicators)
+        merged_nonreplicator = new_nonreplicators(nonreplicators, workspace_assembly)
 
     if replicators:
-        add_to_schematic(replicators, workspace_assembly)
-        merged_replicators = modo.Scene().addMesh(MERGED_REPLICATORS_NAME)
-        parent_items_to([merged_replicators, ], parent=None, index=0)  # type: ignore
-        add_to_schematic((merged_replicators,), workspace_assembly)
-        merged_replicators.select(replace=True)
-
-        preset_browser_opened = open_preset_browser()
-        lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
-        lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
-        lx.eval('preset.do')
-        restore_preset_browser(preset_browser_opened)
-
-        merge_meshes_meshop_replicators = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
-        lx.eval('item.channel pmodel.meshmerge$copyNormal true')
-        lx.eval('item.channel pmodel.meshmerge$world false')
-        link_to_merge_meshes(replicators, merge_meshes_meshop_replicators)
+        merged_replicator = new_replicators(replicators, workspace_assembly)
 
     modo.Scene().deselect()
     if nonreplicators:
-        merged_nonreplicators.select()
+        merged_nonreplicator.select()
     if replicators:
-        merged_replicators.select()
+        merged_replicator.select()
 
 
 def filter_working(items: Iterable[modo.Item]) -> tuple[modo.Item, ...]:
@@ -87,7 +53,9 @@ def filter_working(items: Iterable[modo.Item]) -> tuple[modo.Item, ...]:
         'mesh',
         'meshInst',
         'replicator',
+        'triSurf',
     )
+
     return tuple(i for i in items if i.type in WORKING_TYPES)
 
 
@@ -101,6 +69,7 @@ def get_workspace_assembly(name: str) -> modo.Item:
             return workspace
 
     lx.eval(f'schematic.createWorkspace "{name}" true')
+
     return get_workspace_assembly(name)
 
 
@@ -136,7 +105,7 @@ def restore_preset_browser(opened: bool):
         )
 
 
-def link_to_merge_meshes(items: tuple[modo.Item], merge_mesh_meshop: modo.Item):
+def link_to_merge_meshes(items: Iterable[modo.Item], merge_mesh_meshop: modo.Item):
     for item in items:
         lx.eval(f'item.link pmodel.meshmerge.graph {{{item.id}}} {{{merge_mesh_meshop.id}}} replace:false')
 
@@ -156,6 +125,54 @@ def select_schematic_nodes(items: list[modo.Item], mode: str = NodeSelection.ADD
         lx.eval(evalstr)
 
 
+def filter_nonreplicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
+    return tuple(i for i in items if i.type != itype_str(c.REPLICATOR_TYPE))  # type:ignore
+
+
+def filter_replicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
+    return tuple(i for i in items if i.type == itype_str(c.REPLICATOR_TYPE))  # type:ignore
+
+
+def new_nonreplicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo.Item:
+    add_to_schematic(items, workspace)
+    merged_nonreplicator = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
+    parent_items_to([merged_nonreplicator, ], parent=None, index=0)
+    add_to_schematic((merged_nonreplicator,), workspace)
+    merged_nonreplicator.select(replace=True)
+
+    preset_browser_opened = open_preset_browser()
+    lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
+    lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
+    lx.eval('preset.do')
+    restore_preset_browser(preset_browser_opened)
+
+    merge_meshes_meshop_nonreplicators = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+    lx.eval('item.channel pmodel.meshmerge$copyNormal true')
+    link_to_merge_meshes(items, merge_meshes_meshop_nonreplicators)
+
+    return merged_nonreplicator
+
+
+def new_replicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo.Item:
+    add_to_schematic(items, workspace)
+    merged_replicators = modo.Scene().addMesh(MERGED_REPLICATORS_NAME)
+    parent_items_to([merged_replicators, ], parent=None, index=0)
+    add_to_schematic((merged_replicators,), workspace)
+    merged_replicators.select(replace=True)
+
+    preset_browser_opened = open_preset_browser()
+    lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
+    lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
+    lx.eval('preset.do')
+    restore_preset_browser(preset_browser_opened)
+
+    merge_meshes_meshop_replicators = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+    lx.eval('item.channel pmodel.meshmerge$copyNormal true')
+    lx.eval('item.channel pmodel.meshmerge$world false')
+    link_to_merge_meshes(items, merge_meshes_meshop_replicators)
+
+    return merged_replicators
+
+
 if __name__ == '__main__':
-    h3dd = H3dDebug(enable=False, file=modo.Scene().filename+'.log')
     main()
