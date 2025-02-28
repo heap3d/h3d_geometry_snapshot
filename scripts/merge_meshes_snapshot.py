@@ -19,8 +19,8 @@ from h3d_utilites.scripts.h3d_utils import itype_str, parent_items_to
 
 
 WORKSPACE_NAME = '_Geometry Snapshot'
-MERGED_NONREPLICATORS_NAME = 'merged non-replicators'
-MERGED_REPLICATORS_NAME = 'merged replicators'
+MERGED_NONREPLICATORS_NAME = 'non-replicators snapshot'
+MERGED_REPLICATORS_NAME = 'replicators snapshot'
 
 
 def main():
@@ -135,10 +135,10 @@ def filter_replicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
 
 def new_nonreplicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo.Item:
     add_to_schematic(items, workspace)
-    merged_nonreplicator = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
-    parent_items_to([merged_nonreplicator, ], parent=None, index=0)
-    add_to_schematic((merged_nonreplicator,), workspace)
-    merged_nonreplicator.select(replace=True)
+    merged_nonreplicators = modo.Scene().addMesh(MERGED_NONREPLICATORS_NAME)
+    parent_items_to([merged_nonreplicators, ], parent=None, index=0)
+    add_to_schematic((merged_nonreplicators,), workspace)
+    merged_nonreplicators.select(replace=True)
 
     preset_browser_opened = open_preset_browser()
     lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
@@ -150,7 +150,11 @@ def new_nonreplicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo
     lx.eval('item.channel pmodel.meshmerge$copyNormal true')
     link_to_merge_meshes(items, merge_meshes_meshop_nonreplicators)
 
-    return merged_nonreplicator
+    mesh_id = merged_nonreplicators.id
+    meshop_id = merge_meshes_meshop_nonreplicators
+    lx.eval(f'deformer.freeze false deformer:{meshop_id} mesh:{{{mesh_id}}}')
+
+    return merged_nonreplicators
 
 
 def new_replicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo.Item:
@@ -170,6 +174,10 @@ def new_replicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo.It
     lx.eval('item.channel pmodel.meshmerge$copyNormal true')
     lx.eval('item.channel pmodel.meshmerge$world false')
     link_to_merge_meshes(items, merge_meshes_meshop_replicators)
+
+    mesh_id = merged_replicators.id
+    meshop_id = merge_meshes_meshop_replicators
+    lx.eval(f'deformer.freeze false deformer:{meshop_id} mesh:{{{mesh_id}}}')
 
     return merged_replicators
 
