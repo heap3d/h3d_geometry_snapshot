@@ -91,6 +91,7 @@ class Snapshots:
             return instances[0]
 
 
+# TODO Work with meshref items with changed name
 def main():
     args = lx.args()
     selected_mode = False
