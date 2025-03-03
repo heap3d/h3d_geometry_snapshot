@@ -22,15 +22,25 @@ WORKSPACE_NAME = '_Geometry Snapshot'
 MERGED_NONREPLICATORS_NAME = 'non-replicators snapshot'
 MERGED_REPLICATORS_NAME = 'replicators snapshot'
 
+TYPE_MESH = 'mesh'
+TYPE_MESHINST = 'meshInst'
+TYPE_REPLICATOR = 'replicator'
+TYPE_STATICMESH = 'triSurf'
+TYPE_GROUPLOCATOR = 'groupLocator'
+TYPE_LOCATOR = 'locator'
+
 
 def main():
     selected: tuple[modo.Item] = modo.Scene().selected  # type: ignore
     selected_geometry = filter_working(selected)
-    nonreplicators = filter_nonreplicators(selected_geometry)
-    replicators = filter_replicators(selected_geometry)
-
     if not selected_geometry:
         return
+
+    nonreplicators = filter_nonreplicators(selected_geometry)
+    staticmeshes = filter_staticmeshes(selected_geometry)
+    converted_staticmeshes = convert_to_mesh(staticmeshes)
+    nonreplicators += converted_staticmeshes
+    replicators = filter_replicators(selected_geometry)
 
     workspace_assembly = get_workspace_assembly(WORKSPACE_NAME)
     view_workspace_assembly(workspace_assembly)
@@ -125,12 +135,34 @@ def select_schematic_nodes(items: list[modo.Item], mode: str = NodeSelection.ADD
         lx.eval(evalstr)
 
 
-def filter_nonreplicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
-    return tuple(i for i in items if i.type != itype_str(c.REPLICATOR_TYPE))  # type:ignore
+def filter_nonreplicators(items: Iterable[modo.Item]) -> list[modo.Item]:
+    NONREPLICATORS_TYPES = (
+        TYPE_REPLICATOR,
+        TYPE_STATICMESH
+    )
+    return [i for i in items if i.type not in NONREPLICATORS_TYPES]
 
 
-def filter_replicators(items: Iterable[modo.Item]) -> tuple[modo.Item]:
-    return tuple(i for i in items if i.type == itype_str(c.REPLICATOR_TYPE))  # type:ignore
+def filter_replicators(items: Iterable[modo.Item]) -> list[modo.Item]:
+    return [i for i in items if i.type == itype_str(c.REPLICATOR_TYPE)]
+
+
+def filter_staticmeshes(items: Iterable[modo.Item]) -> list[modo.Item]:
+    return [i for i in items if i.type == TYPE_STATICMESH]
+
+
+def convert_to_mesh(items: Iterable[modo.Item]) -> list[modo.Item]:
+    if not items:
+        return []
+
+    modo.Scene().deselect()
+    for item in items:
+        if not item:
+            continue
+        item.select()
+    lx.eval('item.setType mesh locator')
+
+    return modo.Scene().selected
 
 
 def new_nonreplicators(items: Iterable[modo.Item], workspace: modo.Item) -> modo.Item:

@@ -34,9 +34,18 @@ from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     link_to_merge_meshes,
     filter_nonreplicators,
     filter_replicators,
+    filter_staticmeshes,
+    convert_to_mesh,
+    TYPE_MESH,
+    TYPE_MESHINST,
+    TYPE_STATICMESH,
+    TYPE_REPLICATOR,
+    TYPE_LOCATOR,
+    TYPE_GROUPLOCATOR,
 )
 
 from h3d_utilites.scripts.h3d_debug import h3dd, prints, fn_in, fn_out
+
 
 SNAPSHOT_NAME_SUFFIX = '_snapshot'
 MESHINNST_NAME_SUFFIX = '_meshInst'
@@ -51,6 +60,9 @@ def main():
         return
 
     nonreplicators = filter_nonreplicators(selected_geometry)
+    staticmeshes = filter_staticmeshes(selected_geometry)
+    converted_staticmeshes = convert_to_mesh(staticmeshes)
+    nonreplicators += converted_staticmeshes
     prints(nonreplicators)
     replicators = filter_replicators(selected_geometry)
     freeze = get_user_value(FREEZE_MESHOP)
@@ -77,12 +89,12 @@ def main():
 
 def filter_working_hierarchy(items: Iterable[modo.Item]):
     WORKING_TYPES = (
-        'mesh',
-        'meshInst',
-        'replicator',
-        'triSurf',
-        'groupLocator',
-        'locator',
+        TYPE_MESH,
+        TYPE_MESHINST,
+        TYPE_REPLICATOR,
+        TYPE_STATICMESH,
+        TYPE_GROUPLOCATOR,
+        TYPE_LOCATOR,
     )
 
     return tuple(i for i in items if i.type in WORKING_TYPES)
@@ -90,8 +102,8 @@ def filter_working_hierarchy(items: Iterable[modo.Item]):
 
 def is_hierarchy_item(item: modo.Item) -> bool:
     HIERARCHY_TYPES = (
-        'groupLocator',
-        'locator',
+        TYPE_GROUPLOCATOR,
+        TYPE_LOCATOR,
     )
 
     return item.type in HIERARCHY_TYPES
@@ -118,18 +130,21 @@ def new_nonreplicator(item: modo.Item, workspace: modo.Item, freeze: bool) -> mo
     prints(item)
     merged_nonreplicator = modo.Scene().addMesh(snapshot_name(item.name))
     prints(merged_nonreplicator)
+
     add_to_schematic((merged_nonreplicator,), workspace)
     merged_nonreplicator.select(replace=True)
 
     match_pos_rot(merged_nonreplicator, item)
     match_scl(merged_nonreplicator, item)
 
-    if item.type == 'meshInst':
-        instance_source_geo = get_source_of_instance(item)
-        if instance_source_geo:
-            instance_info = f'{MESHINST_INFO_TAG}{instance_source_geo.name}'
+    if item.type == TYPE_MESHINST:
+        instance_source = get_source_of_instance(item)
+        if instance_source:
+            instance_info = f'{MESHINST_INFO_TAG}{instance_source.name}'
             set_description_tag(merged_nonreplicator, instance_info)
             merged_nonreplicator.name = f'{merged_nonreplicator.name}{MESHINNST_NAME_SUFFIX}'
+            # if instance_source.type == TYPE_STATICMESH:
+            #     convert_to_mesh(instance_source)
 
     lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
     lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
