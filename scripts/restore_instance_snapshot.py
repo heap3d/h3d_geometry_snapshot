@@ -9,7 +9,7 @@
 # calling external replace_with_instance.py from h3d_propagate_tools
 # ================================
 
-from typing import Iterable, Optional
+from typing import Sequence, Optional
 
 import lx
 import modo
@@ -20,12 +20,14 @@ from h3d_geometry_snapshot.scripts.merge_meshes_individual_snapshot import (
     SNAPSHOT_NAME_SUFFIX, MESHINNST_NAME_SUFFIX, MESHINST_INFO_TAG, snapshot_name
 )
 
+from h3d_utilites.scripts.h3d_debug import h3dd, prints, fn_in, fn_out
+
 
 CMD_SELECTED = "selected"
 
 
 class Snapshots:
-    def __init__(self, items: Iterable[modo.Item]) -> None:
+    def __init__(self, items: Sequence[modo.Item]) -> None:
         self.items = items
         self.instances: list[modo.Item] = []
         self.relations: dict[str, list[modo.Item]] = dict()
@@ -105,11 +107,16 @@ def main():
 
     snapshots = Snapshots(items)
     snapshot_source_names = snapshots.source_names()
+    prints(snapshot_source_names)
     for source_name in snapshot_source_names:
+        prints(source_name)
         make_instances(snapshots.get_source_item(source_name), snapshots.get_instances(source_name))
 
 
-def make_instances(source: Optional[modo.Item], items: Optional[Iterable[modo.Item]]):
+def make_instances(source: Optional[modo.Item], items: Optional[Sequence[modo.Item]]):
+    fn_in()
+    prints(source)
+    prints(items)
     if not source:
         return
 
@@ -120,8 +127,12 @@ def make_instances(source: Optional[modo.Item], items: Optional[Iterable[modo.It
     for item in items:
         item.select()
     source.select()
+    prints('before replace_with_instance.py call')
     lx.eval('@scripts/replace_with_instance.py')
+
+    fn_out()
 
 
 if __name__ == '__main__':
+    h3dd.enable_debug_output(False)
     main()
