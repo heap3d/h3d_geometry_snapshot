@@ -143,8 +143,6 @@ def new_nonreplicator(item: modo.Item, workspace: modo.Item, freeze: bool) -> mo
             instance_info = f'{MESHINST_INFO_TAG}{instance_source.name}'
             set_description_tag(merged_nonreplicator, instance_info)
             merged_nonreplicator.name = f'{merged_nonreplicator.name}{MESHINNST_NAME_SUFFIX}'
-            # if instance_source.type == TYPE_STATICMESH:
-            #     convert_to_mesh(instance_source)
 
     lx.eval('select.filepath "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" set')
     lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')

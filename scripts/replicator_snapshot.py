@@ -20,7 +20,6 @@ from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
 )
 
 from h3d_utilites.scripts.h3d_utils import parent_items_to
-from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 
 REPLICATOR_NAME = 'SNAPSHOT'
@@ -75,5 +74,4 @@ def replicator_link_prototype(item: modo.Item, replicator: modo.Item) -> None:
 
 
 if __name__ == '__main__':
-    h3dd = H3dDebug(enable=False, file='replicator snapshot.log')
     main()

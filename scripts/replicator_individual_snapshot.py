@@ -15,7 +15,6 @@ import modo.constants as c
 
 from typing import Union
 
-from h3d_utilites.scripts.h3d_debug import H3dDebug
 from h3d_utilites.scripts.h3d_utils import match_pos_rot, itype_str, parent_items_to
 
 from h3d_geometry_snapshot.scripts.replicator_snapshot import (
@@ -54,7 +53,6 @@ def main():
 
 
 def replicate_nonparent(item: modo.Item) -> Union[modo.Item, None]:
-    printd(f'{item.name=} {item.id=} {item.type=} {item=}')
     if item.type not in ALLOWED_TYPES:
         return None
     if item.type == itype_str(c.REPLICATOR_TYPE):
@@ -81,6 +79,4 @@ def rename(name: str) -> str:
 
 
 if __name__ == '__main__':
-    h3dd = H3dDebug(enable=False, file=modo.Scene().filename + '.log')
-    printd = h3dd.print_debug
     main()

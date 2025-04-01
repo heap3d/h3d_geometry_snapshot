@@ -77,8 +77,8 @@ class Snapshots:
     def get_instances(self, source_name: str) -> list[modo.Item]:
         return self.relations[source_name]
 
-    def get_source_name(self, item: modo.Item) -> str:
-        return get_description_tag(item)
+    # def get_source_name(self, item: modo.Item) -> str:
+    #     return get_description_tag(item)
 
     def source_names(self) -> list[str]:
         return list(self.relations.keys())
@@ -128,7 +128,10 @@ def make_instances(source: Optional[modo.Item], items: Optional[Sequence[modo.It
         item.select()
     source.select()
     prints('before replace_with_instance.py call')
-    lx.eval('@scripts/replace_with_instance.py')
+    if len(modo.Scene().selected) > 1:
+        lx.eval('@scripts/replace_with_instance.py')
+    else:
+        print(f'Failed to make instances, items:<{items}>, source:<{source}>')
 
     fn_out()
 
