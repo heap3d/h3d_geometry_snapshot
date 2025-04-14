@@ -9,17 +9,19 @@
 # ================================
 
 
+from typing import Iterable
+
 import modo
 import lx
 
-from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
+from h3d_utilites.scripts.h3d_utils import parent_items_to
+
+from scripts.merge_meshes_snapshot import (
     WORKSPACE_NAME,
     get_workspace_assembly,
     view_workspace_assembly,
     add_to_schematic,
 )
-
-from h3d_utilites.scripts.h3d_utils import parent_items_to
 
 
 REPLICATOR_NAME = 'SNAPSHOT'
@@ -29,21 +31,22 @@ VERTEX_ZERO_NAME = 'vertex_ZERO'
 
 def main():
     selected = modo.Scene().selected
-    replicator = replicate(selected)  # type: ignore
+    replicator = replicate(selected)
     replicator.select(replace=True)
 
 
-def replicate(items: tuple[modo.Item]) -> modo.Item:
+def replicate(items: Iterable[modo.Item]) -> modo.Item:
     vertex_zero = get_vertex_zero(VERTEX_ZERO_NAME)
     parent_mesh = new_mesh_vertex_at_zero(PARENT_MESH_NAME)
-    parent_items_to(items, parent_mesh)  # type: ignore
+    parent_items_to(items, parent_mesh)
+
     replicator: modo.Item = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
-    if channel := replicator.channel('hierarchy'):
-        channel.set(True)
+    activate_replicator_hierarchy(replicator)
+    activate_oc_motion_blur(replicator)
 
     workspace = get_workspace_assembly(WORKSPACE_NAME)
     view_workspace_assembly(workspace)
-    add_to_schematic((vertex_zero, parent_mesh, replicator), workspace)  # type: ignore
+    add_to_schematic((vertex_zero, parent_mesh, replicator), workspace)
     lx.eval(f'item.link particle.source {{{vertex_zero.id}}} {{{replicator.id}}} replace:false')
     lx.eval(f'item.link particle.proto {{{parent_mesh.id}}} {{{replicator.id}}} replace:false')
 
@@ -69,8 +72,18 @@ def new_mesh_vertex_at_zero(name: str) -> modo.Item:
     return vertex_zero_mesh
 
 
-def replicator_link_prototype(item: modo.Item, replicator: modo.Item) -> None:
-    lx.eval(f'item.link particle.proto {{{item.id}}} {{{replicator.id}}} replace:false')
+def activate_replicator_hierarchy(item: modo.Item):
+    hierarchy = 'hierarchy'
+    try:
+        channel = item.channel(hierarchy)
+        if channel:
+            channel.set(True)
+    except LookupError:
+        print(f'channel {hierarchy} not found for item {item.name}')
+
+
+def activate_oc_motion_blur(item: modo.Item):
+    lx.eval(f'item.channel oc_objectMotionBlur true item:{{{item.id}}}')
 
 
 if __name__ == '__main__':
