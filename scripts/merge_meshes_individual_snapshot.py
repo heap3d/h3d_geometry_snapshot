@@ -11,8 +11,8 @@
 
 from typing import Iterable
 
-import modo
 import lx
+import modo
 
 from h3d_utilites.scripts.h3d_utils import (
     parent_items_to,
@@ -26,6 +26,11 @@ from h3d_utilites.scripts.h3d_utils import (
 
 from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     WORKSPACE_NAME,
+    FREEZE_MESHOP,
+    TYPE_MESHINST,
+    TYPE_LOCATOR,
+    TYPE_GROUPLOCATOR,
+    WORKING_GEOMETRY_TYPES,
     get_workspace_assembly,
     add_to_schematic,
     view_workspace_assembly,
@@ -36,21 +41,21 @@ from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
     filter_replicators,
     filter_staticmeshes,
     convert_to_mesh,
-    TYPE_MESH,
-    TYPE_MESHINST,
-    TYPE_STATICMESH,
-    TYPE_REPLICATOR,
-    TYPE_LOCATOR,
-    TYPE_GROUPLOCATOR,
 )
-
-from h3d_utilites.scripts.h3d_debug import h3dd, prints, fn_in, fn_out
 
 
 SNAPSHOT_NAME_SUFFIX = '_snapshot'
 MESHINNST_NAME_SUFFIX = '_meshInst'
 MESHINST_INFO_TAG = 'meshInst:'
-FREEZE_MESHOP = 'h3d_gss_freeze'
+
+HIERARCHY_TYPES = (
+    TYPE_GROUPLOCATOR,
+    TYPE_LOCATOR,
+)
+WORKING_HIERARCHY_TYPES = (
+    *WORKING_GEOMETRY_TYPES,
+    *HIERARCHY_TYPES,
+)
 
 
 def main():
@@ -59,13 +64,13 @@ def main():
     if not selected_geometry:
         return
 
+    freeze = get_user_value(FREEZE_MESHOP)
+
     nonreplicators = filter_nonreplicators(selected_geometry)
     staticmeshes = filter_staticmeshes(selected_geometry)
     converted_staticmeshes = convert_to_mesh(staticmeshes)
     nonreplicators += converted_staticmeshes
-    prints(nonreplicators)
     replicators = filter_replicators(selected_geometry)
-    freeze = get_user_value(FREEZE_MESHOP)
 
     workspace = get_workspace_assembly(WORKSPACE_NAME)
     view_workspace_assembly(workspace)
@@ -88,24 +93,10 @@ def main():
 
 
 def filter_working_hierarchy(items: Iterable[modo.Item]):
-    WORKING_TYPES = (
-        TYPE_MESH,
-        TYPE_MESHINST,
-        TYPE_REPLICATOR,
-        TYPE_STATICMESH,
-        TYPE_GROUPLOCATOR,
-        TYPE_LOCATOR,
-    )
-
-    return tuple(i for i in items if i.type in WORKING_TYPES)
+    return tuple(i for i in items if i.type in WORKING_HIERARCHY_TYPES)
 
 
 def is_hierarchy_item(item: modo.Item) -> bool:
-    HIERARCHY_TYPES = (
-        TYPE_GROUPLOCATOR,
-        TYPE_LOCATOR,
-    )
-
     return item.type in HIERARCHY_TYPES
 
 
@@ -126,10 +117,7 @@ def new_individual_nonreplicators(items: Iterable[modo.Item], workspace: modo.It
 
 
 def new_nonreplicator(item: modo.Item, workspace: modo.Item, freeze: bool) -> modo.Item:
-    fn_in()
-    prints(item)
     merged_nonreplicator = modo.Scene().addMesh(snapshot_name(item.name))
-    prints(merged_nonreplicator)
 
     add_to_schematic((merged_nonreplicator,), workspace)
     merged_nonreplicator.select(replace=True)
@@ -148,17 +136,16 @@ def new_nonreplicator(item: modo.Item, workspace: modo.Item, freeze: bool) -> mo
     lx.eval('select.preset "[itemtypes]:MeshOperations/edit/pmodel.meshmerge.itemtype" mode:set')
     lx.eval('preset.do')
 
-    merge_meshes_meshop_nonreplicator = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
+    merge_meshes_meshop_nonreplicator: modo.Item = modo.Scene().selectedByType(itype='pmodel.meshmerge')[0]
     lx.eval('item.channel pmodel.meshmerge$copyNormal true')
     lx.eval('item.channel pmodel.meshmerge$world false')
     link_to_merge_meshes((item,), merge_meshes_meshop_nonreplicator)
 
     if freeze:
         mesh_id = merged_nonreplicator.id
-        meshop_id = merge_meshes_meshop_nonreplicator
-        lx.eval(f'deformer.freeze false deformer:{meshop_id} mesh:{{{mesh_id}}}')
+        meshop_id = merge_meshes_meshop_nonreplicator  # works without .id only
+        lx.eval(f'deformer.freeze duplicate:false deformer:{{{meshop_id}}} mesh:{{{mesh_id}}}')
 
-    fn_out()
     return merged_nonreplicator
 
 
@@ -194,12 +181,11 @@ def new_replicator(item: modo.Item, workspace: modo.Item, freeze: bool) -> modo.
 
     if freeze:
         mesh_id = merged_replicator.id
-        meshop_id = merge_meshes_meshop_replicator
-        lx.eval(f'deformer.freeze false deformer:{meshop_id} mesh:{{{mesh_id}}}')
+        meshop_id = merge_meshes_meshop_replicator  # works without .id only
+        lx.eval(f'deformer.freeze duplicate:false deformer:{{{meshop_id}}} mesh:{{{mesh_id}}}')
 
     return merged_replicator
 
 
 if __name__ == '__main__':
-    h3dd.enable_debug_output(False)
     main()

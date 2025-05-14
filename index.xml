@@ -2,8 +2,10 @@
 <package version="801">
 	<kit name="h3d_geometry_snapshot" restart="YES">
 		<source target="h3d_geometry_snapshot/index.CFG">index.CFG</source>
+		<source target="h3d_geometry_snapshot/scripts/extract_deferred_meshes.py">scripts/extract_deferred_meshes.py</source>
 		<source target="h3d_geometry_snapshot/scripts/merge_meshes_individual_snapshot.py">scripts/merge_meshes_individual_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/merge_meshes_snapshot.py">scripts/merge_meshes_snapshot.py</source>
+		<source target="h3d_geometry_snapshot/scripts/meshref_reveal.py">scripts/meshref_reveal.py</source>
 		<source target="h3d_geometry_snapshot/scripts/replicator_individual_snapshot.py">scripts/replicator_individual_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/replicator_snapshot.py">scripts/replicator_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/restore_instance_snapshot.py">scripts/restore_instance_snapshot.py</source>
