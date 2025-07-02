@@ -15,7 +15,7 @@ import modo.constants as c
 
 from typing import Optional
 
-from h3d_utilites.scripts.h3d_utils import match_pos_rot, itype_str, parent_items_to
+from h3d_utilites.scripts.h3d_utils import match_pos_rot, match_scl, itype_str, parent_items_to
 
 from h3d_geometry_snapshot.scripts.replicator_snapshot import (
     VERTEX_ZERO_NAME,
@@ -46,6 +46,7 @@ def main():
         if not replicator:
             continue
         match_pos_rot(replicator, item)
+        match_scl(replicator, item)
         replicators.append(replicator)
 
     modo.Scene().deselect()

@@ -7,6 +7,7 @@
 		<source target="h3d_geometry_snapshot/scripts/merge_meshes_snapshot.py">scripts/merge_meshes_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/meshref_reveal.py">scripts/meshref_reveal.py</source>
 		<source target="h3d_geometry_snapshot/scripts/replicator_individual_snapshot.py">scripts/replicator_individual_snapshot.py</source>
+		<source target="h3d_geometry_snapshot/scripts/replicator_snapshot_each.py">scripts/replicator_snapshot_each.py</source>
 		<source target="h3d_geometry_snapshot/scripts/replicator_snapshot.py">scripts/replicator_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/restore_instance_snapshot.py">scripts/restore_instance_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_mesh_instances_from_selection.py">scripts/select_mesh_instances_from_selection.py</source>

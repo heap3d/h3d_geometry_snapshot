@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2024 Dmytro Holub
+# (C)2024-2025 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -8,10 +8,8 @@
 # make replicator for selected items snapshot
 # ================================
 
-
-from typing import Iterable
-
 import modo
+import modo.constants as c
 import lx
 
 from h3d_utilites.scripts.h3d_utils import parent_items_to
@@ -24,23 +22,29 @@ from scripts.merge_meshes_snapshot import (
 )
 
 
-REPLICATOR_NAME = 'SNAPSHOT'
-PARENT_MESH_NAME = 'parent mesh'
+REPLICATOR_NAME_SUFFIX = '_snapshot'
+PARENT_MESH_NAME_SUFFIX = '_container'
 VERTEX_ZERO_NAME = 'vertex_ZERO'
 
 
 def main():
-    selected = modo.Scene().selected
+    selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    if not selected:
+        return
     replicator = replicate(selected)
     replicator.select(replace=True)
 
 
-def replicate(items: Iterable[modo.Item]) -> modo.Item:
+def replicate(items: list[modo.Item]) -> modo.Item:
+    if not items:
+        raise ValueError('No items provided')
+
+    basename = items[0].name
     vertex_zero = get_vertex_zero(VERTEX_ZERO_NAME)
-    parent_mesh = new_mesh_vertex_at_zero(PARENT_MESH_NAME)
+    parent_mesh = new_mesh_vertex_at_zero(f'{basename}{PARENT_MESH_NAME_SUFFIX}')
     parent_items_to(items, parent_mesh)
 
-    replicator: modo.Item = modo.Scene().addItem(itype='replicator', name=REPLICATOR_NAME)
+    replicator: modo.Item = modo.Scene().addItem(itype='replicator', name=f'{basename}{REPLICATOR_NAME_SUFFIX}')
     activate_replicator_hierarchy(replicator)
     activate_oc_motion_blur(replicator)
 

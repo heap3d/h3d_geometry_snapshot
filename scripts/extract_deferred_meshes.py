@@ -109,7 +109,7 @@ def extract_defmesh_surface(item: modo.Item, name: str) -> modo.Item:
     before_children = set(item.childrenByType(c.TRISURF_TYPE))
 
     item.select(replace=True)
-    lx.eval(f'deferredMesh.removeGeometry static {name}')
+    lx.eval(f'deferredMesh.removeGeometry static {{{name}}}')
 
     after_children = set(item.childrenByType(c.TRISURF_TYPE))
     new_children = list(after_children - before_children)
