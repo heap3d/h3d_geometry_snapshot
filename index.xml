@@ -12,6 +12,7 @@
 		<source target="h3d_geometry_snapshot/scripts/restore_instance_snapshot.py">scripts/restore_instance_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_mesh_instances_from_selection.py">scripts/select_mesh_instances_from_selection.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_meshes_from_selection.py">scripts/select_meshes_from_selection.py</source>
+		<source target="h3d_geometry_snapshot/scripts/select_parents.py">scripts/select_parents.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_schematic_nodes.py">scripts/select_schematic_nodes.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_snapshot_items.py">scripts/select_snapshot_items.py</source>
 		<source target="h3d_geometry_snapshot/scripts/select_static_meshes_from_selection.py">scripts/select_static_meshes_from_selection.py</source>
