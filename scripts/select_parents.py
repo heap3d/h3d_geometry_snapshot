@@ -21,7 +21,7 @@ def main():
     for item in selected_items:
         parents = item.parents
         if parents is not None:
-            item_parents.add(parents[0])
+            item_parents.add(parents[-1])
         else:
             item_parents.add(item)
 
