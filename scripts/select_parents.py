@@ -5,7 +5,7 @@
 # --------------------------------
 # modo python
 # EMAG
-# select top-level parents for selected items or keep selection if item at the root of the hierarchy
+# select root level parents for selected items or keep selection if item at the root of the hierarchy
 # ================================
 
 import modo
