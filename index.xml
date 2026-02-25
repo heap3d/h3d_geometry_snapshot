@@ -3,6 +3,7 @@
 	<kit name="h3d_geometry_snapshot" restart="YES">
 		<source target="h3d_geometry_snapshot/index.CFG">index.CFG</source>
 		<source target="h3d_geometry_snapshot/scripts/extract_deferred_meshes.py">scripts/extract_deferred_meshes.py</source>
+		<source target="h3d_geometry_snapshot/scripts/filter_topmost_selected.py">scripts/filter_topmost_selected.py</source>
 		<source target="h3d_geometry_snapshot/scripts/merge_meshes_individual_snapshot.py">scripts/merge_meshes_individual_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/merge_meshes_snapshot.py">scripts/merge_meshes_snapshot.py</source>
 		<source target="h3d_geometry_snapshot/scripts/meshref_reveal.py">scripts/meshref_reveal.py</source>
