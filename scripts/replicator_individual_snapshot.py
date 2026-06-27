@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2024 Dmytro Holub
+# (C)2024-2026 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -15,7 +15,7 @@ import modo.constants as c
 
 from typing import Optional
 
-from h3d_utilites.scripts.h3d_utils import match_pos_rot, match_scl, itype_str, parent_items_to
+from h3d_utilites.scripts.h3d_utils import match_pos_rot, match_scl, itype_str, parent_items_to, execution_time_alarm
 
 from h3d_geometry_snapshot.scripts.replicator_snapshot import (
     VERTEX_ZERO_NAME,
@@ -38,6 +38,7 @@ ALLOWED_TYPES = (
 )
 
 
+@execution_time_alarm('Replicator Individual Snapshot')
 def main():
     selected: list[modo.Item] = modo.Scene().selected
     replicators: list[modo.Item] = []

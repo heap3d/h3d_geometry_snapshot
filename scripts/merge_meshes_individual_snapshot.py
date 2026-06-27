@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2024 Dmytro Holub
+# (C)2024-2026 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -22,6 +22,7 @@ from h3d_utilites.scripts.h3d_utils import (
     set_description_tag,
     get_user_value,
     get_parent_index,
+    execution_time_alarm,
 )
 
 from h3d_geometry_snapshot.scripts.merge_meshes_snapshot import (
@@ -58,6 +59,7 @@ WORKING_HIERARCHY_TYPES = (
 )
 
 
+@execution_time_alarm('Merge Meshes Individual Snapshot')
 def main():
     selected: tuple[modo.Item] = modo.Scene().selected  # type: ignore
     selected_geometry = filter_working_hierarchy(selected)

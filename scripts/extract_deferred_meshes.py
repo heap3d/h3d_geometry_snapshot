@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2025 Dmytro Holub
+# (C)2025-2026 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -15,12 +15,13 @@ import lx
 from pathlib import PurePath, Path
 import shutil
 
-from h3d_utilites.scripts.h3d_utils import itype_str
+from h3d_utilites.scripts.h3d_utils import itype_str, execution_time_alarm
 
 
 BACKUP_SUFFIX = ' --- EMPTY ---'
 
 
+@execution_time_alarm('Extract Deferred Mesh')
 def main():
     items: list[modo.Item] = modo.Scene().selectedByType(itype=c.DEFERREDMESH_TYPE)
     if not items:

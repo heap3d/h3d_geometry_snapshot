@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2024-2025 Dmytro Holub
+# (C)2024-2026 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -12,7 +12,7 @@ import modo
 import modo.constants as c
 import lx
 
-from h3d_utilites.scripts.h3d_utils import parent_items_to
+from h3d_utilites.scripts.h3d_utils import parent_items_to, execution_time_alarm
 
 from scripts.merge_meshes_snapshot import (
     WORKSPACE_NAME,
@@ -27,6 +27,7 @@ PARENT_MESH_NAME_SUFFIX = '_container'
 VERTEX_ZERO_NAME = 'vertex_ZERO'
 
 
+@execution_time_alarm('Replicator Snapshot')
 def main():
     selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     if not selected:

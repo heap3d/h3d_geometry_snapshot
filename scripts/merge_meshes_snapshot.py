@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2024 Dmytro Holub
+# (C)2024-2026 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -14,7 +14,7 @@ from typing import Iterable
 import lx
 import modo
 
-from h3d_utilites.scripts.h3d_utils import parent_items_to, get_user_value
+from h3d_utilites.scripts.h3d_utils import parent_items_to, get_user_value, execution_time_alarm
 
 from scripts.extract_deferred_meshes import convert_deferred_mesh
 
@@ -45,6 +45,7 @@ NONREPLICATORS_IGNORE_TYPES = (
 FREEZE_MESHOP = 'h3d_gss_freeze'
 
 
+@execution_time_alarm('Merge Meshes Snapshot')
 def main():
     selected: list[modo.Item] = modo.Scene().selected  # type: ignore
     selected_geometry = filter_working_geometry(selected)
